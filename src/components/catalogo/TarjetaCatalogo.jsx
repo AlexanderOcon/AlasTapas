@@ -74,7 +74,7 @@ const TarjetaCatalogo = ({ producto, categoriaNombre }) => {
           <hr />
           <div className="mt-auto pt-2">
             <h4 className="text-success fw-bold mb-0">
-              C${parseFloat(producto.precio_venta).toFixed(1)}
+              C${parseFloat(producto.precio_costo).toFixed(1)}
             </h4>
           </div>
         </Card.Body>

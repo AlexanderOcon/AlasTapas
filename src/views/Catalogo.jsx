@@ -1,13 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Button,
-  Spinner,
-  Alert,
-  Form,
-} from "react-bootstrap";
+import {Container,Row,Col,Button,Spinner,Alert,Form,} from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 import TarjetaCatalogo from "../components/catalogo/TarjetaCatalogo";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
@@ -66,7 +58,7 @@ const Catalogo = () => {
       filtrados = filtrados.filter((prod) => {
         const nombre = prod.nombre_producto?.toLowerCase() || "";
         const descripcion = prod.descripcion_producto?.toLowerCase() || "";
-        const precioTexto = prod.precio_venta?.toString() || "";
+        const precioTexto = prod.precio_costo?.toString() || "";
 
         return (
           nombre.includes(textoLower) ||
