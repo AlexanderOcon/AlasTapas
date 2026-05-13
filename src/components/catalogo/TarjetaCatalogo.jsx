@@ -124,7 +124,7 @@ const TarjetaCatalogo = ({ producto, categoriaNombre }) => {
               </div>
 
               <h3 className="text-success fw-bold mb-4">
-                C${parseFloat(producto.precio_venta).toFixed(1)}
+                C${parseFloat(producto.precio_costo).toFixed(1)}
               </h3>
 
               {descripcion && (
