@@ -9,6 +9,8 @@ import TarjetaCategoria from "../components/categorias/TarjetaCategoria";
 import NotificacionOperacion from "../components/NotificacionOperacion";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import Paginacion from "../components/ordenamiento/Paginacion";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const Categorias = () => {
   const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
@@ -277,17 +279,207 @@ const Categorias = () => {
     }
   };
 
+  const generarPDFCategoria = (categoria) => {
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Título
+      doc.setFontSize(22);
+      doc.setFont(undefined, "bold");
+      doc.text("Ficha de Categoría", 14, 20);
+
+      // Subtítulo con nombre de la empresa
+      doc.setFontSize(14);
+      doc.setFont(undefined, "normal");
+      doc.setTextColor(150, 0, 0);
+      doc.text("AlasTapas", 14, 28);
+      doc.setTextColor(0, 0, 0);
+
+      // Línea decorativa
+      doc.setDrawColor(200, 0, 0);
+      doc.setLineWidth(1);
+      doc.line(14, 32, pageWidth - 14, 32);
+
+      let yPosition = 50;
+
+      // Información de la categoría
+      doc.setFontSize(16);
+      doc.setFont(undefined, "bold");
+      doc.setTextColor(50, 50, 50);
+      doc.text(categoria.nombre_categoria, 14, yPosition);
+
+      yPosition += 15;
+
+      // ID
+      doc.setFontSize(10);
+      doc.setFont(undefined, "normal");
+      doc.setTextColor(70, 70, 70);
+      doc.text(`ID: ${categoria.id_categoria}`, 14, yPosition);
+
+      yPosition += 10;
+
+      // Descripción
+      doc.setFontSize(11);
+      doc.setFont(undefined, "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text("Descripción:", 14, yPosition);
+
+      yPosition += 8;
+      doc.setFontSize(10);
+      doc.setFont(undefined, "normal");
+      doc.setTextColor(50, 50, 50);
+
+      if (categoria.descripcion_categoria) {
+        const descArray = doc.splitTextToSize(
+          categoria.descripcion_categoria,
+          pageWidth - 28
+        );
+        doc.text(descArray, 14, yPosition);
+      } else {
+        doc.text("Sin descripción disponible", 14, yPosition);
+      }
+
+      // Pie de página
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `Generado: ${new Date().toLocaleDateString("es-ES")} | AlasTapas`,
+        14,
+        doc.internal.pageSize.getHeight() - 10
+      );
+
+      // Descargar PDF
+      doc.save(`categoria_${categoria.id_categoria}_${categoria.nombre_categoria}.pdf`);
+
+      setToast({
+        mostrar: true,
+        mensaje: `PDF de "${categoria.nombre_categoria}" generado correctamente`,
+        tipo: "exito",
+      });
+    } catch (err) {
+      console.error("Error al generar PDF de categoría:", err);
+      setToast({
+        mostrar: true,
+        mensaje: "Error al generar el PDF",
+        tipo: "error",
+      });
+    }
+  };
+
+  const generarPDFCategorias = () => {
+    try {
+      if (categorias.length === 0) {
+        setToast({
+          mostrar: true,
+          mensaje: "No hay categorías para exportar",
+          tipo: "advertencia",
+        });
+        return;
+      }
+
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      // Encabezado
+      doc.setFontSize(22);
+      doc.setFont(undefined, "bold");
+      doc.text("Catálogo de Categorías", 14, 20);
+
+      doc.setFontSize(14);
+      doc.setFont(undefined, "normal");
+      doc.setTextColor(150, 0, 0);
+      doc.text("AlasTapas", 14, 28);
+      doc.setTextColor(0, 0, 0);
+
+      doc.setDrawColor(200, 0, 0);
+      doc.setLineWidth(1);
+      doc.line(14, 34, pageWidth - 14, 34);
+
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.setFont(undefined, "normal");
+      doc.text(
+        `Generado: ${new Date().toLocaleDateString("es-ES")} | Total de categorías: ${categorias.length}`,
+        14,
+        40
+      );
+
+      // Preparar datos para la tabla
+      const head = [["ID", "Nombre", "Descripción"]];
+      const body = categorias.map((cat) => [
+        `#${cat.id_categoria}`,
+        cat.nombre_categoria || "-",
+        cat.descripcion_categoria || "",
+      ]);
+
+      // Generar tabla con autotable
+      autoTable(doc, {
+        startY: 48,
+        head: head,
+        body: body,
+        theme: "grid",
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [200, 0, 0], textColor: 255 },
+        columnStyles: {
+          0: { cellWidth: 20 },
+          1: { cellWidth: 70 },
+          2: { cellWidth: pageWidth - 14 - 20 - 70 - 16 },
+        },
+        didDrawPage: (data) => {
+          // pie de página en la última página
+        },
+      });
+
+      // Pie de página
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        "Este catálogo fue generado automáticamente por el sistema AlasTapas",
+        14,
+        pageHeight - 10
+      );
+
+      // Descargar PDF
+      doc.save("catalogo_categorias_alastapas.pdf");
+
+      setToast({
+        mostrar: true,
+        mensaje: "PDF generado correctamente",
+        tipo: "exito",
+      });
+    } catch (err) {
+      console.error("Error al generar PDF:", err);
+      setToast({
+        mostrar: true,
+        mensaje: "Error al generar el PDF",
+        tipo: "error",
+      });
+    }
+  };
+
   return (
 
     <Container className="mt-3">
       {/* Título y botón Nueva Categoría */}
       <Row className="align-items-center mb-3">
-        <Col xs={9} sm={7} md={7} lg={7} className="d-flex align-items-center">
+        <Col className="d-flex align-items-center">
           <h3 className="mb-0">
             <i className="bi-bookmark-plus-fill me-2"></i> Categorías
           </h3>
         </Col>
-        <Col xs={3} sm={5} md={5} lg={5} className="text-end">
+
+        <Col xs={12} sm={12} md={12} lg={5} className="text-end d-flex gap-2 justify-content-end mt-2 mt-lg-0">
+          <Button 
+            onClick={generarPDFCategorias} 
+            variant="success" 
+            size="md"
+            title="Exportar catálogo en PDF"
+          >
+            <i className="bi-file-pdf"></i>
+            <span className="d-none d-sm-inline ms-2">Exportar PDF</span>
+          </Button>
           <Button onClick={() => setMostrarModal(true)} size="md">
             <i className="bi-plus-lg"></i>
             <span className="d-none d-sm-inline ms-2">Nueva Categoría</span>
@@ -335,6 +527,7 @@ const Categorias = () => {
               categorias={categoriasFiltradas}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
+              generarPDFCategoria={generarPDFCategoria}
             />
           </Col>
         </Row>
@@ -370,6 +563,7 @@ const Categorias = () => {
               categorias={categorias}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
+              generarPDFCategoria={generarPDFCategoria}
             />
           </Col>
         </Row>
