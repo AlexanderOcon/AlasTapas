@@ -9,6 +9,8 @@ import Paginacion from "../components/ordenamiento/Paginacion";
 import NotificacionOperacion from "../components/NotificacionOperacion";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import TarjetaProducto from "../components/productos/TarjetasProductos";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const Productos = () => {
   const [productos, setProductos] = useState([]);
@@ -335,6 +337,346 @@ const Productos = () => {
     }
   };
 
+  const generarPDF = async () => {
+    try {
+      if (productosFiltrados.length === 0) {
+        setToast({
+          mostrar: true,
+          mensaje: "No hay productos para exportar",
+          tipo: "advertencia",
+        });
+        return;
+      }
+
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      let yPosition = 20;
+
+      // Título principal
+      doc.setFontSize(22);
+      doc.setFont(undefined, "bold");
+      doc.text("Catálogo de Productos", 14, yPosition);
+      yPosition += 8;
+
+      // Subtítulo con nombre de la empresa
+      doc.setFontSize(14);
+      doc.setFont(undefined, "normal");
+      doc.setTextColor(150, 0, 0);
+      doc.text("AlasTapas", 14, yPosition);
+      yPosition += 8;
+
+      // Línea decorativa
+      doc.setDrawColor(200, 0, 0);
+      doc.setLineWidth(1);
+      doc.line(14, yPosition, pageWidth - 14, yPosition);
+      yPosition += 8;
+
+      // Información de generación
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.setFont(undefined, "normal");
+      doc.text(
+        `Generado: ${new Date().toLocaleDateString("es-ES")} | Total de productos: ${productosFiltrados.length}`,
+        14,
+        yPosition,
+      );
+      doc.setTextColor(0, 0, 0);
+      yPosition += 12;
+
+      // Iterar sobre los productos
+      for (let i = 0; i < productosFiltrados.length; i++) {
+        const producto = productosFiltrados[i];
+        const categoria = categorias.find(
+          (cat) => cat.id_categoria === producto.categoria_producto,
+        );
+
+        // Verificar si hay espacio suficiente
+        if (yPosition > pageHeight - 80) {
+          doc.addPage();
+          yPosition = 20;
+        }
+
+        // Contenedor para la tarjeta del producto
+        const cardHeight = 58;
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.5);
+        doc.rect(14, yPosition - 5, pageWidth - 28, cardHeight);
+
+        // Agregar imagen del producto
+        const imgX = 19;
+        const imgWidth = 48;
+        const imgHeight = 48;
+
+        if (producto.url_imagen) {
+          try {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = producto.url_imagen;
+
+            await new Promise((resolve, reject) => {
+              img.onload = () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+                const imgData = canvas.toDataURL("image/jpeg");
+
+                doc.addImage(
+                  imgData,
+                  "JPEG",
+                  imgX,
+                  yPosition - 2,
+                  imgWidth,
+                  imgHeight,
+                );
+                resolve();
+              };
+              img.onerror = () => resolve(); // Continuar sin imagen si hay error
+            });
+          } catch (err) {
+            console.error("Error procesando imagen:", err);
+          }
+        }
+
+        // Información del producto (lado derecho)
+        const infoX = imgX + imgWidth + 8;
+        const infoWidth = pageWidth - infoX - 16;
+
+        // Nombre del producto
+        doc.setFontSize(12);
+        doc.setFont(undefined, "bold");
+        doc.setTextColor(50, 50, 50);
+        const nombreArray = doc.splitTextToSize(
+          producto.nombre_producto,
+          infoWidth,
+        );
+        doc.text(nombreArray, infoX, yPosition + 3);
+        let textY = yPosition + 3 + nombreArray.length * 5;
+
+        // Detalles en tabla
+        doc.setFontSize(9);
+        doc.setFont(undefined, "normal");
+        doc.setTextColor(70, 70, 70);
+
+        // Categoría
+        doc.setFont(undefined, "bold");
+        doc.text("Categoría:", infoX, textY);
+        doc.setFont(undefined, "normal");
+        doc.text(categoria?.nombre_categoria || "N/A", infoX + 28, textY);
+        textY += 5;
+
+        // Precio
+        doc.setFont(undefined, "bold");
+        doc.setTextColor(200, 0, 0);
+        doc.text("Precio:", infoX, textY);
+        doc.setFont(undefined, "bold");
+        doc.text(`$${producto.precio_costo.toFixed(2)}`, infoX + 28, textY);
+        textY += 5;
+
+        // Stock
+        doc.setFont(undefined, "bold");
+        doc.setTextColor(0, 100, 0);
+        doc.text("Stock:", infoX, textY);
+        doc.setFont(undefined, "normal");
+        doc.setTextColor(70, 70, 70);
+        doc.text(`${producto.stock} unidades`, infoX + 28, textY);
+
+        // Descripción si existe
+        if (producto.descripcion_producto) {
+          textY += 8;
+          doc.setFontSize(9);
+          doc.setFont(undefined, "normal");
+          doc.setTextColor(50, 50, 50);
+          const descArray = doc.splitTextToSize(
+            producto.descripcion_producto,
+            infoWidth,
+          );
+          doc.text(descArray, infoX, textY);
+        }
+
+        // Espacio entre productos
+        yPosition += cardHeight + 8;
+        doc.setTextColor(0, 0, 0);
+      }
+
+      // Pie de página
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        "Este catálogo fue generado automáticamente por el sistema AlasTapas",
+        14,
+        pageHeight - 10,
+      );
+
+      // Descargar PDF
+      doc.save("catalogo_productos_alastapas.pdf");
+
+      setToast({
+        mostrar: true,
+        mensaje: "PDF generado correctamente",
+        tipo: "exito",
+      });
+    } catch (err) {
+      console.error("Error al generar PDF:", err);
+      setToast({
+        mostrar: true,
+        mensaje: "Error al generar el PDF",
+        tipo: "error",
+      });
+    }
+  };
+
+  const generarPDFProducto = async (producto) => {
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const categoria = categorias.find(
+        (cat) => cat.id_categoria === producto.categoria_producto,
+      );
+
+      // Título
+      doc.setFontSize(22);
+      doc.setFont(undefined, "bold");
+      doc.text("Ficha de Producto", 14, 20);
+
+      // Subtítulo con nombre de la empresa
+      doc.setFontSize(14);
+      doc.setFont(undefined, "normal");
+      doc.setTextColor(150, 0, 0);
+      doc.text("AlasTapas", 14, 28);
+      doc.setTextColor(0, 0, 0);
+
+      // Línea decorativa
+      doc.setDrawColor(200, 0, 0);
+      doc.setLineWidth(1);
+      doc.line(14, 32, pageWidth - 14, 32);
+
+      let yPosition = 42;
+      const imgWidth = 80;
+      const imgHeight = 80;
+
+      // Agregar imagen del producto
+      if (producto.url_imagen) {
+        try {
+          const img = new Image();
+          img.crossOrigin = "Anonymous";
+          img.src = producto.url_imagen;
+
+          await new Promise((resolve, reject) => {
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0);
+              const imgData = canvas.toDataURL("image/jpeg");
+
+              doc.addImage(imgData, "JPEG", 14, yPosition, imgWidth, imgHeight);
+              resolve();
+            };
+            img.onerror = () => resolve();
+          });
+        } catch (err) {
+          console.error("Error procesando imagen:", err);
+        }
+      }
+
+      // Información del producto (lado derecho de la imagen)
+      const infoX = 100;
+      let infoY = yPosition;
+
+      // Nombre
+      doc.setFontSize(16);
+      doc.setFont(undefined, "bold");
+      doc.setTextColor(50, 50, 50);
+      doc.text(producto.nombre_producto, infoX, infoY);
+
+      // ID
+      infoY += 10;
+      doc.setFontSize(10);
+      doc.setFont(undefined, "normal");
+      doc.setTextColor(70, 70, 70);
+      doc.text(`ID: ${producto.id_producto}`, infoX, infoY);
+
+      // Categoría
+      infoY += 7;
+      doc.setFont(undefined, "bold");
+      doc.text("Categoría:", infoX, infoY);
+      doc.setFont(undefined, "normal");
+      doc.text(categoria?.nombre_categoria || "N/A", infoX + 35, infoY);
+
+      // Precio
+      infoY += 7;
+      doc.setFont(undefined, "bold");
+      doc.setTextColor(200, 0, 0);
+      doc.text("Precio:", infoX, infoY);
+      doc.text(`$${producto.precio_costo.toFixed(2)}`, infoX + 35, infoY);
+
+      // Stock
+      infoY += 7;
+      doc.setFont(undefined, "bold");
+      doc.setTextColor(0, 100, 0);
+      doc.text("Stock:", infoX, infoY);
+      doc.setTextColor(70, 70, 70);
+      doc.text(`${producto.stock} unidades`, infoX + 35, infoY);
+
+      // Descripción (debajo del stock y la imagen)
+      let descY = infoY + 20;
+      if (yPosition + imgHeight > descY) {
+        descY = yPosition + imgHeight + 15;
+      }
+
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(11);
+      doc.setFont(undefined, "bold");
+      doc.text("Descripción:", 14, descY);
+
+      descY += 8;
+      doc.setFontSize(10);
+      doc.setFont(undefined, "normal");
+      doc.setTextColor(50, 50, 50);
+
+      if (producto.descripcion_producto) {
+        const descArray = doc.splitTextToSize(
+          producto.descripcion_producto,
+          pageWidth - 28,
+        );
+        doc.text(descArray, 14, descY);
+      } else {
+        doc.text("Sin descripción disponible", 14, descY);
+      }
+
+      // Pie de página
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `Generado: ${new Date().toLocaleDateString("es-ES")} | AlasTapas`,
+        14,
+        doc.internal.pageSize.getHeight() - 10,
+      );
+
+      // Descargar PDF
+      doc.save(
+        `producto_${producto.id_producto}_${producto.nombre_producto}.pdf`,
+      );
+
+      setToast({
+        mostrar: true,
+        mensaje: `PDF de "${producto.nombre_producto}" generado correctamente`,
+        tipo: "exito",
+      });
+    } catch (err) {
+      console.error("Error al generar PDF del producto:", err);
+      setToast({
+        mostrar: true,
+        mensaje: "Error al generar el PDF",
+        tipo: "error",
+      });
+    }
+  };
+
   return (
     <Container className="mt-3">
       <Row className="align-items-center mb-3">
@@ -344,7 +686,22 @@ const Productos = () => {
           </h3>
         </Col>
 
-        <Col xs={3} sm={5} md={5} lg={5} className="text-end">
+        <Col
+          xs={12}
+          sm={12}
+          md={12}
+          lg={5}
+          className="text-end d-flex gap-2 justify-content-end mt-2 mt-lg-0"
+        >
+          <Button
+            onClick={generarPDF}
+            variant="success"
+            size="md"
+            title="Exportar catálogo en PDF"
+          >
+            <i className="bi-file-pdf"></i>
+            <span className="d-none d-sm-inline ms-2">Exportar PDF</span>
+          </Button>
           <Button onClick={() => setMostrarModal(true)} size="md">
             <i className="bi-plus-lg"></i>
             <span className="d-none d-sm-inline ms-2">Nuevo Producto</span>
@@ -386,6 +743,7 @@ const Productos = () => {
             cargando={cargando}
             abrirModalEdicion={abrirModalEdicion}
             abrirModalEliminacion={abrirModalEliminacion}
+            generarPDFProducto={generarPDFProducto}
           />
         </Col>
       </Row>
