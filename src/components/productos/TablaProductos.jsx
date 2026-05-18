@@ -1,19 +1,12 @@
 import React from "react";
 import { Table, Spinner, Button } from "react-bootstrap";
 
-const TablaProductos = ({
-  productos,
-  categorias,
-  abrirModalEdicion,
-  abrirModalEliminacion,
-  cargando,
-  generarPDFProducto,
-}) => {
+const TablaProductos = ({productos, categorias, abrirModalEdicion, abrirModalEliminacion, cargando,generarPDFProducto,}) => {
   const obtenerNombreCategoria = (id) => {
     const cat = categorias?.find((c) => c.id_categoria === id);
     return cat ? cat.nombre_categoria : id;
   };
-   
+
   return (
     <>
       {cargando ? (
