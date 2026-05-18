@@ -9,6 +9,8 @@ import TarjetaCategoria from "../components/categorias/TarjetaCategoria";
 import NotificacionOperacion from "../components/NotificacionOperacion";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import Paginacion from "../components/ordenamiento/Paginacion";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const Categorias = () => {
   const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
@@ -34,7 +36,7 @@ const Categorias = () => {
 
   const categoriasPaginadas = categoriasFiltradas.slice(
     (PaginaActual - 1) * registroPorPagina,
-    PaginaActual * registroPorPagina
+    PaginaActual * registroPorPagina,
   );
 
   const [categoriaEditar, setCategoriaEditar] = useState({
@@ -42,6 +44,33 @@ const Categorias = () => {
     nombre_categoria: "",
     descripcion_categoria: "",
   });
+  
+   const generarPDFCategoria = (categoria) => {
+    const doc = new jsPDF();
+
+    // Título
+    doc.setFontSize(18);
+    doc.text("Reporte de Categoría", 14, 20);
+
+    // Línea decorativa
+    doc.line(14, 25, 195, 25);
+
+    // Información de la categoría
+    doc.setFontSize(12);
+
+    autoTable(doc, {
+      startY: 35,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["ID", categoria.id_categoria],
+        ["Nombre", categoria.nombre_categoria],
+        ["Descripción", categoria.descripcion_categoria],
+      ],
+    });
+
+    // Descargar PDF
+    doc.save(`categoria_${categoria.id_categoria}.pdf`);
+  };
 
   const cargarCategorias = async () => {
     try {
@@ -57,7 +86,7 @@ const Categorias = () => {
           mensaje: "Error al cargar categorías.",
           tipo: "error",
         });
-        
+
         return;
       }
       setCategorias(
@@ -92,7 +121,8 @@ const Categorias = () => {
       const filtradas = categorias.filter(
         (cat) =>
           cat.nombre_categoria.toLowerCase().includes(textoLower) ||
-          (cat.descripcion_categoria && cat.descripcion_categoria.toLowerCase().includes(textoLower))
+          (cat.descripcion_categoria &&
+            cat.descripcion_categoria.toLowerCase().includes(textoLower)),
       );
       setCategoriasFiltradas(filtradas);
     }
@@ -277,8 +307,10 @@ const Categorias = () => {
     }
   };
 
-  return (
+ 
 
+ 
+  return (
     <Container className="mt-3">
       {/* Título y botón Nueva Categoría */}
       <Row className="align-items-center mb-3">
@@ -297,7 +329,7 @@ const Categorias = () => {
 
       <hr />
 
-       {/* Cuadro de busqueda */}
+      {/* Cuadro de busqueda */}
       <Row className="mb-4">
         <Col md={6} lg={5}>
           <CuadroBusquedas
@@ -309,7 +341,9 @@ const Categorias = () => {
       </Row>
 
       {/* Mensaje cuando no se encuentran categorías */}
-      {!cargando && textoBusqueda.trim() && categoriasFiltradas.length === 0 && (
+      {!cargando &&
+        textoBusqueda.trim() &&
+        categoriasFiltradas.length === 0 && (
           <Row className="mb-4">
             <Col>
               <Alert variant="info" className="text-center">
@@ -332,14 +366,14 @@ const Categorias = () => {
           </Col>
           <Col lg={12} className="d-none d-lg-block">
             <TablaCategorias
-              categorias={categoriasFiltradas}
+              categorias={categoriasPaginadas}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
+              generarPDFCategoria={generarPDFCategoria}
             />
           </Col>
         </Row>
       )}
-
 
       {/* Spinner mientras se cargan las categorías */}
       {cargando && (
@@ -351,31 +385,29 @@ const Categorias = () => {
         </Row>
       )}
 
-      
-        <Col xs={12} sm={12} md={12} className="d-lg-none">
-          <TarjetaCategoria
-            categorias={categoriasPaginadas}
-            abrirModalEdicion={abrirModalEdicion}
-            abrirModalEliminacion={abrirModalEliminacion}
-          />
-        </Col>
-      
+      <Col xs={12} sm={12} md={12} className="d-lg-none">
+        <TarjetaCategoria
+          categorias={categoriasPaginadas}
+          abrirModalEdicion={abrirModalEdicion}
+          abrirModalEliminacion={abrirModalEliminacion}
+        />
+      </Col>
 
-
-       {/* Lista de categorías cargadas */}
-      {!cargando && !textoBusqueda.trim() && categorias.length > 0 &&  (
+      {/* Lista de categorías cargadas */}
+      {!cargando && !textoBusqueda.trim() && categorias.length > 0 && (
         <Row>
           <Col lg={12} className="d-none d-lg-block">
             <TablaCategorias
               categorias={categorias}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
+              generarPDFCategoria={generarPDFCategoria}
             />
           </Col>
         </Row>
       )}
 
-       {/* Paginación */}
+      {/* Paginación */}
       {categoriasFiltradas.length > 0 && (
         <Paginacion
           registroPorPagina={registroPorPagina}
