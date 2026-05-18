@@ -13,7 +13,7 @@ const TablaProductos = ({
     const cat = categorias?.find((c) => c.id_categoria === id);
     return cat ? cat.nombre_categoria : id;
   };
-
+   
   return (
     <>
       {cargando ? (
