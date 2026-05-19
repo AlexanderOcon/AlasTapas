@@ -10,7 +10,6 @@ import NotificacionOperacion from "../components/NotificacionOperacion";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import Paginacion from "../components/ordenamiento/Paginacion";
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 
 const Categorias = () => {
   const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
@@ -58,15 +57,15 @@ const Categorias = () => {
     // Información de la categoría
     doc.setFontSize(12);
 
-    autoTable(doc, {
-      startY: 35,
-      head: [["Campo", "Valor"]],
-      body: [
-        ["ID", categoria.id_categoria],
-        ["Nombre", categoria.nombre_categoria],
-        ["Descripción", categoria.descripcion_categoria],
-      ],
-    });
+    // autoTable(doc, {
+    //   startY: 35,
+    //   head: [["Campo", "Valor"]],
+    //   body: [
+    //     ["ID", categoria.id_categoria],
+    //     ["Nombre", categoria.nombre_categoria],
+    //     ["Descripción", categoria.descripcion_categoria],
+    //   ],
+    // });
 
     // Descargar PDF
     doc.save(`categoria_${categoria.id_categoria}.pdf`);

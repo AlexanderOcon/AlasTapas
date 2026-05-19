@@ -91,15 +91,15 @@ const Encabezado = () => {
               <strong>Productos</strong>
             </Nav.Link>
 
-            {/* Opción para ir al catálogo público desde admin */}
             <Nav.Link
-              onClick={() => manejarNavegacion("/catalogo")}
+              onClick={() => manejarNavegacion("/ordenes")}
               className={mostrarMenu ? "color-texto-marca" : "text-white"}
             >
-              {mostrarMenu ? <i className="bi-images me-2"></i> : null}
-              <strong>Catálogo</strong>
+              {mostrarMenu ? <i className="bi-receipt me-2"></i> : null}
+              <strong>Órdenes</strong>
             </Nav.Link>
 
+            
             {/* Opción para ir al catálogo público desde admin */}
             <Nav.Link
               onClick={() => manejarNavegacion("/clientes")}
@@ -107,6 +107,25 @@ const Encabezado = () => {
             >
               {mostrarMenu ? <i className="bi-images me-2"></i> : null}
               <strong>Clientes</strong>
+            </Nav.Link>
+
+             {/* Opción para ir al catálogo público desde admin */}
+            <Nav.Link
+              onClick={() => manejarNavegacion("/ventas")}
+              className={mostrarMenu ? "color-texto-marca" : "text-white"}
+            >
+              {mostrarMenu ? <i className="bi-images me-2"></i> : null}
+              <strong>Ventas</strong>
+            </Nav.Link>
+
+
+            {/* Opción para ir al catálogo público desde admin */}
+            <Nav.Link
+              onClick={() => manejarNavegacion("/catalogo")}
+              className={mostrarMenu ? "color-texto-marca" : "text-white"}
+            >
+              {mostrarMenu ? <i className="bi-images me-2"></i> : null}
+              <strong>Catálogo</strong>
             </Nav.Link>
 
 
