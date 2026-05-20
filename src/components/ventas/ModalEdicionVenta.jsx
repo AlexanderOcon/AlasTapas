@@ -56,7 +56,6 @@ const ModalEdicionVenta = ({
                   onChange={manejoCambioInputEdicion}
                 >
                   <option value="pendiente">Pendiente</option>
-                  <option value="completada">Completada</option>
                   <option value="cancelada">Cancelada</option>
                 </Form.Select>
               </Form.Group>
@@ -96,14 +95,14 @@ const ModalEdicionVenta = ({
                   const producto = productosDisponibles.find(
                     (p) => p.id_producto.toString() === detalle.nombre_producto?.toString(),
                   );
-                  const subtotal = producto ? producto.precio * detalle.cantidad : 0;
+                  const subtotal = producto ? producto.precio_costo * detalle.cantidad : 0;
 
                   return (
                     <tr key={index}>
                       <td>{producto?.nombre_producto || "Producto"}</td>
                       <td className="text-center">{detalle.cantidad}</td>
                       <td className="text-end">
-                        ${producto?.precio?.toFixed(2) || "0.00"}
+                        ${producto?.precio_costo?.toFixed(2) || "0.00"}
                       </td>
                       <td className="text-end fw-bold">
                         ${subtotal.toFixed(2)}

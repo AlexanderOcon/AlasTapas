@@ -111,7 +111,7 @@ const Ventas = () => {
       // Cargar productos
       const { data: dataProductos } = await supabase
         .from("productos")
-        .select("id_producto, nombre_producto, precio");
+        .select("id_producto, nombre_producto, precio_costo");
 
       // Cargar detalles de órdenes
       const { data: dataDetalles } = await supabase
@@ -157,7 +157,7 @@ const Ventas = () => {
         (p) => p.id_producto.toString() === detalle.nombre_producto?.toString(),
       );
       if (producto) {
-        total += producto.precio * detalle.cantidad;
+        total += producto.precio_costo * detalle.cantidad;
       }
     });
 
@@ -199,14 +199,16 @@ const Ventas = () => {
       }
 
       const total = calcularTotalVenta(nuevaVenta.id_orden);
+      const totalRedondeado = parseFloat(total.toFixed(2));
+      const estadoBoolean = (nuevaVenta.estado_venta || "pendiente") !== "cancelada";
 
       const { error: errVenta } = await supabase
         .from("ventas")
         .insert([
           {
             id_orden: parseInt(nuevaVenta.id_orden),
-            estado_venta: nuevaVenta.estado_venta || "pendiente",
-            total_venta: total,
+            estado_venta: estadoBoolean,
+            total_venta: totalRedondeado,
           },
         ]);
 
@@ -241,10 +243,12 @@ const Ventas = () => {
       (c) => c.id_cliente.toString() === orden?.id_cliente?.toString(),
     );
 
+    const estadoTexto = venta.estado_venta === false ? "cancelada" : "pendiente";
+
     setVentaEditar({
       id_venta: venta.id_venta,
       id_orden: venta.id_orden,
-      estado_venta: venta.estado_venta || "pendiente",
+      estado_venta: estadoTexto,
       total_venta: venta.total_venta,
     });
 
@@ -264,10 +268,11 @@ const Ventas = () => {
 
   const actualizarVenta = async () => {
     try {
+      const estadoBoolean = (ventaEditar.estado_venta || "pendiente") !== "cancelada";
       const { error: errVenta } = await supabase
         .from("ventas")
         .update({
-          estado_venta: ventaEditar.estado_venta,
+          estado_venta: estadoBoolean,
         })
         .eq("id_venta", ventaEditar.id_venta);
 
@@ -300,7 +305,7 @@ const Ventas = () => {
     try {
       const { error: errVenta } = await supabase
         .from("ventas")
-        .delete()
+        .update({ estado_venta: false })
         .eq("id_venta", ventaACancelar.id_venta);
 
       if (errVenta) throw errVenta;

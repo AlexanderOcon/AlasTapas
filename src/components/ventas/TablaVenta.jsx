@@ -70,14 +70,12 @@ const TablaVenta = ({
                   <td>
                     <Badge
                       bg={
-                        v.estado_venta === "completada"
-                          ? "success"
-                          : v.estado_venta === "cancelada"
-                            ? "danger"
-                            : "warning"
+                        v.estado_venta === false
+                          ? "danger"
+                          : "warning"
                       }
                     >
-                      {v.estado_venta || "Pendiente"}
+                      {v.estado_venta === false ? "Cancelada" : "Pendiente"}
                     </Badge>
                   </td>
                   <td className="text-center">
