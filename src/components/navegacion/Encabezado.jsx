@@ -118,6 +118,14 @@ const Encabezado = () => {
               <strong>Ventas</strong>
             </Nav.Link>
 
+            <Nav.Link
+              onClick={() => manejarNavegacion("/dashboard")}
+              className={mostrarMenu ? "color-texto-marca" : "text-white"}
+            >
+              {mostrarMenu ? <i className="bi-images me-2"></i> : null}
+              <strong>Dashboard</strong>
+            </Nav.Link>
+
 
             {/* Opción para ir al catálogo público desde admin */}
             <Nav.Link
