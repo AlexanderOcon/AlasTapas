@@ -7,6 +7,7 @@ const TarjetaProducto = ({
   categorias,
   abrirModalEdicion,
   abrirModalEliminacion,
+  copiarProducto,
 }) => {
   const [cargando, setCargando] = useState(true);
   const [idTarjetaActiva, setIdTarjetaActiva] = useState(null);
@@ -137,6 +138,17 @@ const TarjetaProducto = ({
                 aria-label={`Eliminar ${producto.nombre_producto}`}
               >
                 <i className="bi bi-trash"></i> Eliminar
+              </Button>
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                onClick={() => {
+                  copiarProducto?.(producto);
+                  setIdTarjetaActiva(null);
+                }}
+                aria-label={`Copiar ${producto.nombre_producto}`}
+              >
+                <i className="bi bi-clipboard"></i> Copiar
               </Button>
             </div>
           </div>

@@ -71,6 +71,28 @@ const Categorias = () => {
     doc.save(`categoria_${categoria.id_categoria}.pdf`);
   };
 
+  const copiarCategoria = async (categoria) => {
+    if (!categoria) return;
+
+    const texto = `ID: ${categoria.id_categoria}\nCategoría: ${categoria.nombre_categoria}\nDescripción: ${categoria.descripcion_categoria || 'Sin descripción'}`;
+
+    try {
+      await navigator.clipboard.writeText(texto);
+      setToast({
+        mostrar: true,
+        mensaje: `Categoría "${categoria.nombre_categoria}" copiada al portapapeles`,
+        tipo: "exito",
+      });
+    } catch (err) {
+      console.error("Error al copiar:", err);
+      setToast({
+        mostrar: true,
+        mensaje: "No se pudo copiar al portapapeles",
+        tipo: "error",
+      });
+    }
+  };
+
   const cargarCategorias = async () => {
     try {
       setCargando(true);
@@ -361,6 +383,7 @@ const Categorias = () => {
               categorias={categoriasPaginadas}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
+              copiarCategoria={copiarCategoria}
             />
           </Col>
           <Col lg={12} className="d-none d-lg-block">
@@ -369,6 +392,7 @@ const Categorias = () => {
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
               generarPDFCategoria={generarPDFCategoria}
+              copiarCategoria={copiarCategoria}
             />
           </Col>
         </Row>
@@ -389,6 +413,7 @@ const Categorias = () => {
           categorias={categoriasPaginadas}
           abrirModalEdicion={abrirModalEdicion}
           abrirModalEliminacion={abrirModalEliminacion}
+          copiarCategoria={copiarCategoria}
         />
       </Col>
 
@@ -401,6 +426,7 @@ const Categorias = () => {
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
               generarPDFCategoria={generarPDFCategoria}
+              copiarCategoria={copiarCategoria}
             />
           </Col>
         </Row>
