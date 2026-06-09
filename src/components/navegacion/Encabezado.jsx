@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Container, Nav, Navbar, Offcanvas } from "react-bootstrap";
 import logo from "../../assets/logo.png"; 
 import { supabase } from "../../database/supabaseconfig";
+import ChatIA from "../ia/ChatIA";
 
 const Encabezado = () => {
   const [mostrarMenu, setMostrarMenu] = useState(false);
@@ -29,11 +30,13 @@ const Encabezado = () => {
     }
   };
 
+ const [mostrarChatIA, setMostrarChatIA] = useState(false);
   // Detectar rutas especiales
   const esLogin = location.pathname === "/login";
   const esCatalogo =
     location.pathname === "/catalogo" &&
     localStorage.getItem("usuario-supabase") === null;
+
 
   // Contenido del menú
   let contenidoMenu;
@@ -99,7 +102,14 @@ const Encabezado = () => {
               <strong>Órdenes</strong>
             </Nav.Link>
 
-            
+            <Nav.Link
+              onClick={() => setMostrarChatIA(!mostrarChatIA)}
+              className={mostrarMenu ? "color-texto-marca" : "text-white"}
+            >
+              {mostrarMenu ? <i className="bi-robot me-2"></i> : null}
+              <strong>Chat IA</strong>
+            </Nav.Link>
+
             {/* Opción para ir al catálogo público desde admin */}
             <Nav.Link
               onClick={() => manejarNavegacion("/clientes")}
@@ -218,6 +228,12 @@ const Encabezado = () => {
 
           <Offcanvas.Body>{contenidoMenu}</Offcanvas.Body>
         </Navbar.Offcanvas>
+
+        {/* Modal Chat IA */}
+        <ChatIA 
+          mostrar={mostrarChatIA} 
+          onCerrar={() => setMostrarChatIA(false)} 
+        />
       </Container>
     </Navbar>
   );

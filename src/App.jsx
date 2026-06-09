@@ -11,10 +11,10 @@ import Ventas from "./views/Ventas";
 import Clientes from "./views/Clientes";
 import Dashboard from "./views/Dashboard";
 import Login from "./views/Login";
-
 import RutaProtegida from "./components/rutas/RutaProtegida";
 import Pagina404 from "./views/Pagina404";
 import "./App.css";
+
 
 const App = () => {
   return (

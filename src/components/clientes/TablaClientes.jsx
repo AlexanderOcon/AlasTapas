@@ -45,8 +45,6 @@ const TablaClientes = ({
                 <td>{cliente.direccion_cliente}</td>
                 <td>{cliente.telefono_cliente}</td>
                 <td className="text-center">
-                </td>
-                <td className="text-center">
                   <Button
                     variant="outline-warning"
                     size="sm"
