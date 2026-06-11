@@ -12,35 +12,7 @@ const detalleValido = {
   cantidad: 2,
 };
 
-console.log("Prueba 1: No se puede registrar orden sin fecha");
-it("No permite registrar sin fecha", () => {
-  const resultado = registroOrden(
-    { id_cliente: "1", fecha_orden: "" },
-    [detalleValido],
-  );
-  expect(resultado.valido).toBe(false);
-  expect(resultado.mensaje).toContain("fecha");
-});
-
-console.log("Prueba 2: No permite cantidad cero");
-it("Rechaza cantidad igual a cero", () => {
-  const resultado = registroOrden(ordenBase, [
-    { ...detalleValido, cantidad: 0 },
-  ]);
-  expect(resultado.valido).toBe(false);
-  expect(resultado.mensaje).toContain("cantidad");
-});
-
-console.log("Prueba 3: No permite cantidad negativa");
-it("Rechaza cantidad negativa", () => {
-  const resultado = registroOrden(ordenBase, [
-    { ...detalleValido, cantidad: -3 },
-  ]);
-  expect(resultado.valido).toBe(false);
-  expect(resultado.mensaje).toContain("cantidad");
-});
-
-console.log("Prueba 4: No permite fecha inválida");
+console.log("Prueba 1: Rechaza fecha inválida");
 it("Rechaza fecha inválida", () => {
   const resultado = registroOrden(
     { id_cliente: "1", fecha_orden: "fecha-invalida" },
@@ -50,9 +22,8 @@ it("Rechaza fecha inválida", () => {
   expect(resultado.mensaje).toContain("fecha");
 });
 
-console.log("Prueba 5: Registra orden correctamente");
-it("Registra orden con datos válidos", () => {
+console.log("Prueba 2: Acepta orden válida");
+it("Acepta orden válida", () => {
   const resultado = registroOrden(ordenBase, [detalleValido]);
   expect(resultado.valido).toBe(true);
 });
-

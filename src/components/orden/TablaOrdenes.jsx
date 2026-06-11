@@ -89,6 +89,8 @@ const TablaOrdenes = ({
                       size="sm"
                       className="m-1"
                       onClick={() => abrirModalEdicion && abrirModalEdicion(o)}
+                      disabled={detalles.length > 0 && detalles.every(d => d.estado_orden === true || d.estado_orden === "true")}
+                      title={detalles.length > 0 && detalles.every(d => d.estado_orden === true || d.estado_orden === "true") ? "Orden completada - No se puede editar" : "Editar Orden"}
                     >
                       <i className="bi bi-pencil"></i>
                     </Button>

@@ -48,7 +48,7 @@ const Ventas = () => {
   const [paginaActual, establecerPaginaActual] = useState(1);
 
   const ventasOrdenadasProcesadas = [...ventasFiltradas].sort(
-    (a, b) => a.id_venta - b.id_venta,
+    (a, b) => b.id_venta - a.id_venta,
   );
 
   const ventasPaginadas = ventasOrdenadasProcesadas.slice(

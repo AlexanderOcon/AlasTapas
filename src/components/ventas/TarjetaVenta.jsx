@@ -110,6 +110,8 @@ const TarjetaVenta = ({
                   size="sm"
                   className="w-50 me-1"
                   onClick={() => abrirModalEdicion && abrirModalEdicion(v)}
+                  disabled={v.estado_venta === false}
+                  title={v.estado_venta === false ? "Venta cancelada - No se puede editar" : "Editar Venta"}
                 >
                   <i className="bi bi-pencil me-1"></i> Editar
                 </Button>

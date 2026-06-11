@@ -84,6 +84,8 @@ const TablaVenta = ({
                       size="sm"
                       className="m-1"
                       onClick={() => abrirModalEdicion && abrirModalEdicion(v)}
+                      disabled={v.estado_venta === false}
+                      title={v.estado_venta === false ? "Venta cancelada - No se puede editar" : "Editar Venta"}
                     >
                       <i className="bi bi-pencil"></i>
                     </Button>
