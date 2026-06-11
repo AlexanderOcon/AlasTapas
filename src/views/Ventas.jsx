@@ -124,7 +124,10 @@ const Ventas = () => {
         .select("*")
         .order("id_venta", { ascending: true });
 
-      if (dataOrdenes) setOrdenesDisponibles(dataOrdenes);
+      if (dataOrdenes) {
+        const ordenesOrdenadas = dataOrdenes.sort((a, b) => b.id_orden - a.id_orden);
+        setOrdenesDisponibles(ordenesOrdenadas);
+      }
       if (dataClientes) setClientesDisponibles(dataClientes);
       if (dataProductos) setProductosDisponibles(dataProductos);
       if (dataVentas) setVentas(dataVentas);
